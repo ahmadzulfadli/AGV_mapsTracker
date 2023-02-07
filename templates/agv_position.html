@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Pemantauan Posisi Robot AGV</title>
+    <style>
+        .container {
+            width: 80%;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .header p {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .map-container {
+            width: 100%;
+            height: 600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .map {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .robot {
+            width: 100px;
+            height: 100px;
+        }
+
+        .robot-position {
+            width: 100%;
+            text-align: center;
+        }
+
+        .robot-position h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .robot-position p {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Pemantauan Posisi Robot AGV</h1>
+            <p>Ini adalah halaman untuk memantau posisi robot AGV pada gudang.</p>
+        </div>
+        
+        <div class="map-container">            
+            <!-- Peta -->
+            {% for peta in peta %}
+            <img class="map" src="../media/{{peta.image}}" alt="Peta Jalur AGV">
+            {% endfor %}
+            {% for robot in robot %}
+            <img class="robot" src="../media/{{robot.image}}" alt="Robot AGV"
+            style="position: absolute; left: {{robot_x}}px; top: {{robot_y}}px;">
+            {% endfor %}
+
+        </div>
+        <div class="robot-position">
+            <h2>Posisi Robot AGV Saat Ini</h2>
+            <p>Koordinat X: <span id="x-coordinate">0</span></p>
+            <p>Koordinat Y: <span id="y-coordinate">0</span></p>
+        </div>
+    </div>
+    <!-- Merubah Gambar Posisi Robot -->
+    <script>
+        setInterval(function() {
+            fetch('{% url "agv_position_api" %}')
+                .then(response => response.json())
+                .then(data => {
+                    document.querySelector('#x-coordinate').innerHTML = data.x;
+                    document.querySelector('#y-coordinate').innerHTML = data.y;
+                    // Update posisi robot pada peta
+                    document.querySelector('.robot').style.left = data.x + 'px';
+                    document.querySelector('.robot').style.top = data.y + 'px';
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        }, 1000);
+    </script>
+</body>
+
+</html>
